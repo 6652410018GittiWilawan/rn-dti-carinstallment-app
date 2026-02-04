@@ -1,14 +1,16 @@
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const car = require("@/assets/images/car.png");
@@ -22,6 +24,36 @@ export default function Input() {
   const [carMont, setCarMonth] = useState("");
   const [carInterest, setCarInterest] = useState("");
   const [carInstallment, setCarInstallment] = useState("");
+
+  const handleCalClick = () => {
+    //Validate
+    if (
+      carPrice === "" ||
+      carDown === "" ||
+      carMont === "" ||
+      carInterest === ""
+    ) {
+      Alert.alert("คำเตือน", "กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
+    }
+
+    //Calculate
+    let downPayment = (Number(carPrice) * Number(carDown)) / 100;
+    let carPayment = Number(carPrice) - downPayment;
+    let totalInterest =
+      ((carPayment * Number(carInterest)) / 100) * (Number(carMont) / 12);
+    let installmentPay = (carPayment + totalInterest) / Number(carMont);
+    //Navigate to Result screen
+    router.push({
+      pathname: "/result",
+      params: {
+        downPayment: downPayment.toFixed(2),
+        carPayment: carPayment.toFixed(2),
+        carPrice: Number(carPrice).toFixed(2),
+        installmentPay: installmentPay.toFixed(2),
+      },
+    });
+  };
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -80,7 +112,7 @@ export default function Input() {
             value={carInterest}
             onChangeText={setCarInterest}
           />
-          <TouchableOpacity style={styles.btnCal}>
+          <TouchableOpacity onPress={handleCalClick} style={styles.btnCal}>
             <Text style={styles.labelCal}>คำนวณค่างวดรถ</Text>
           </TouchableOpacity>
         </View>
